@@ -21,8 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.itemcache;
+package com.example.sbms.gateway.service;
 
-public interface TimestampGenerator {
-    long timestamp();
+public class ServiceException extends RuntimeException {
+    public ServiceException() {
+        super();
+    }
+
+    public ServiceException(String message) {
+        super(message);
+    }
+
+    public ServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ServiceException(Throwable cause) {
+        super(cause);
+    }
+
+    public ServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

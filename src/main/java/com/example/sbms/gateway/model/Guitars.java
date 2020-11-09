@@ -28,12 +28,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Guitars {
-    private boolean completeCollection;
-
     private List<Guitar> all;
+
+    public Optional<Guitar> getOne() {
+        if (this.all.size() > 1) {
+            throw new IllegalStateException(String.format("Guitars.getOne() called when container holds %d guitars.", this.all.size()));
+        }
+        return this.all.isEmpty() ? Optional.empty() : Optional.of(this.all.get(0));
+    }
 }

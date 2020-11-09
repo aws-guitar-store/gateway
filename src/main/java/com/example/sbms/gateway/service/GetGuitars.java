@@ -23,84 +23,53 @@
  */
 package com.example.sbms.gateway.service;
 
-import com.example.sbms.gateway.itemcache.Cache;
-import com.example.sbms.gateway.itemcache.PollingTimeout;
 import com.example.sbms.gateway.model.Filter;
 import com.example.sbms.gateway.model.Guitar;
 import com.example.sbms.gateway.model.Guitars;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Service
 @EnableKafka
 public class GetGuitars {
-    private final KafkaTemplate<String, Filter> kafkaTemplate;
-    private final String requestGuitarsTopic;
-    private final long requestGuitarsTimeout;
-    private final Cache<Guitar> guitars;
+    private final ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate;
+    private final String eventGuitarsRequestedTopic;
+    private final long eventGuitarsRequestedTimeout;
 
-    public GetGuitars(KafkaTemplate<String, Filter> kafkaTemplate, @Value("${spring.kafka.producer.properties.event.guitars-requested.topic}") String requestGuitarsTopic, @Value("${spring.kafka.producer.properties.event.guitars-requested.timeout}") long requestGuitarsTimeout) {
+    public GetGuitars(ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate, @Value("${spring.kafka.producer.properties.event.guitars-requested.topic}") String eventGuitarsRequestedTopic, @Value("${spring.kafka.producer.properties.event.guitars-requested.timeout}") long eventGuitarsRequestedTimeout) {
         this.kafkaTemplate = kafkaTemplate;
-        this.requestGuitarsTopic = requestGuitarsTopic;
-        this.requestGuitarsTimeout = requestGuitarsTimeout;
-        this.guitars = new Cache<>(Guitar::getId);
+        this.eventGuitarsRequestedTopic = eventGuitarsRequestedTopic;
+        this.eventGuitarsRequestedTimeout = eventGuitarsRequestedTimeout;
     }
 
     public List<Guitar> all() {
-        if (this.guitars.isFullyPopulated()) {
-            return new ArrayList<>(this.guitars.all());
-        }
-        this.requestAll();
-        try {
-            return new ArrayList<>(this.guitars.all(this.requestGuitarsTimeout));
-        }
-        catch (PollingTimeout e) {
-            // TODO: handle timeout?
-        }
-        return new ArrayList<>();
+        return this.sendRequest(Filter.forAll()).getAll();
     }
 
     public Optional<Guitar> byId(String id) {
-        if (this.guitars.contains(id)) {
-            return this.guitars.get(id);
+        return this.sendRequest(Filter.forId(id)).getOne();
+    }
+
+    private Guitars sendRequest(Filter filter) {
+        ProducerRecord<String, Filter> producerRecord = new ProducerRecord<>(this.eventGuitarsRequestedTopic, filter);
+        RequestReplyFuture<String, Filter, Guitars> reply = kafkaTemplate.sendAndReceive(producerRecord);
+        try {
+            reply.getSendFuture().get(eventGuitarsRequestedTimeout, TimeUnit.MILLISECONDS);
+            ConsumerRecord<String, Guitars> response = reply.get(this.eventGuitarsRequestedTimeout, TimeUnit.MILLISECONDS);
+            return response.value();
         }
-        this.requestById(id);
-        return this.guitars.get(id, this.requestGuitarsTimeout);
-    }
-
-    @KafkaListener(topics = "${spring.kafka.consumer.properties.event.guitars-provided.topic}", containerFactory = "guitarsContainerFactory", groupId = "${spring.kafka.consumer.properties.unique-group-id}")
-    public void receiveGuitars(@Payload Guitars guitars) {
-        if (guitars.isCompleteCollection()) {
-            this.guitars.setAll(guitars.getAll());
+        catch (InterruptedException | TimeoutException | ExecutionException e) {
+            throw new ServiceException(e);
         }
-        else {
-            guitars.getAll().forEach(this.guitars::add);
-        }
-    }
-
-    private void requestAll() {
-        this.sendRequest(Filter.forAll());
-    }
-
-    private void requestById(String id) {
-        this.sendRequest(Filter.forId(id));
-    }
-
-    private void sendRequest(Filter filter) {
-        Message<Filter> message = MessageBuilder
-                .withPayload(filter)
-                .setHeader(KafkaHeaders.TOPIC, requestGuitarsTopic)
-                .build();
-        // TODO: error handling
-        kafkaTemplate.send(message);
     }
 }

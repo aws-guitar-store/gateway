@@ -23,7 +23,6 @@
  */
 package com.example.sbms.gateway.service;
 
-import com.example.sbms.gateway.model.Guitar;
 import com.example.sbms.gateway.model.Guitars;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -68,20 +67,6 @@ public class KafkaConsumerConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, Guitars> guitarsContainerFactory(KafkaProperties kafkaProperties) {
         ConcurrentKafkaListenerContainerFactory<String, Guitars> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(guitarsConsumerFactory(kafkaProperties));
-        return factory;
-    }
-
-    @Bean
-    public ConsumerFactory<String, Guitar> guitarConsumerFactory(KafkaProperties kafkaProperties) {
-        StringDeserializer keyDeserializer = new StringDeserializer();
-        JsonDeserializer<Guitar> valueDeserializer = new JsonDeserializer<>(Guitar.class);
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), keyDeserializer, valueDeserializer);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Guitar> guitarContainerFactory(KafkaProperties kafkaProperties) {
-        ConcurrentKafkaListenerContainerFactory<String, Guitar> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(guitarConsumerFactory(kafkaProperties));
         return factory;
     }
 }
