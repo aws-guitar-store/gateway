@@ -23,6 +23,7 @@
  */
 package com.example.sbms.gateway.service;
 
+import com.example.sbms.gateway.model.Amps;
 import com.example.sbms.gateway.model.Filter;
 import com.example.sbms.gateway.model.Guitars;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,19 +39,35 @@ public class KafkaRequestReplyConfiguration {
     @Value("${spring.kafka.consumer.properties.event.guitars-provided.topic}")
     private String eventGuitarsProvidedTopic;
 
+    @Value("${spring.kafka.consumer.properties.event.amps-provided.topic}")
+    private String eventAmpsProvidedTopic;
+
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
     @Bean
     public ConcurrentMessageListenerContainer<String, Guitars> filteredGuitarsContainer(ConcurrentKafkaListenerContainerFactory<String, Guitars> containerFactory) {
-        ConcurrentMessageListenerContainer<String, Guitars> repliesContainer = containerFactory.createContainer(eventGuitarsProvidedTopic);
-        repliesContainer.getContainerProperties().setGroupId(groupId);
+        ConcurrentMessageListenerContainer<String, Guitars> repliesContainer = containerFactory.createContainer(this.eventGuitarsProvidedTopic);
+        repliesContainer.getContainerProperties().setGroupId(this.groupId);
         repliesContainer.setAutoStartup(false);
         return repliesContainer;
     }
 
     @Bean
     public ReplyingKafkaTemplate<String, Filter, Guitars> filteredGuitarsKafkaTemplate(ProducerFactory<String, Filter> producerFactory, ConcurrentMessageListenerContainer<String, Guitars> repliesContainer) {
+        return new ReplyingKafkaTemplate<>(producerFactory, repliesContainer);
+    }
+
+    @Bean
+    public ConcurrentMessageListenerContainer<String, Amps> filteredAmpsContainer(ConcurrentKafkaListenerContainerFactory<String, Amps> containerFactory) {
+        ConcurrentMessageListenerContainer<String, Amps> repliesContainer = containerFactory.createContainer(this.eventAmpsProvidedTopic);
+        repliesContainer.getContainerProperties().setGroupId(this.groupId);
+        repliesContainer.setAutoStartup(false);
+        return repliesContainer;
+    }
+
+    @Bean
+    public ReplyingKafkaTemplate<String, Filter, Amps> filteredAmpsKafkaTemplate(ProducerFactory<String, Filter> producerFactory, ConcurrentMessageListenerContainer<String, Amps> repliesContainer) {
         return new ReplyingKafkaTemplate<>(producerFactory, repliesContainer);
     }
 }

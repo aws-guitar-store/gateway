@@ -21,35 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.api;
+package com.example.sbms.gateway.model;
 
-import com.example.sbms.gateway.model.Guitar;
-import com.example.sbms.gateway.service.GetGuitars;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/guitars")
-public class GuitarsController {
-    private final GetGuitars getGuitars;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Amps {
+    private List<Amp> all;
 
-    public GuitarsController(GetGuitars getGuitars) {
-        this.getGuitars = getGuitars;
-    }
-
-    @GetMapping
-    public List<Guitar> allGuitars() {
-        return getGuitars.all();
-    }
-
-    @GetMapping("/{id}")
-    public Guitar guitarById(@PathVariable("id") String id) {
-        return getGuitars.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public Optional<Amp> getOne() {
+        if (this.all.size() > 1) {
+            throw new IllegalStateException(String.format("Amps.getOne() called when container holds %d amps.", this.all.size()));
+        }
+        return this.all.isEmpty() ? Optional.empty() : Optional.of(this.all.get(0));
     }
 }

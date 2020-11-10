@@ -21,35 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.api;
+package com.example.sbms.gateway.model;
 
-import com.example.sbms.gateway.model.Guitar;
-import com.example.sbms.gateway.service.GetGuitars;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import lombok.Data;
 
-import java.util.List;
+@Data
+public class Amp {
+    private Integer id;
 
-@RestController
-@RequestMapping("/guitars")
-public class GuitarsController {
-    private final GetGuitars getGuitars;
+    private String make;
 
-    public GuitarsController(GetGuitars getGuitars) {
-        this.getGuitars = getGuitars;
-    }
+    private String model;
 
-    @GetMapping
-    public List<Guitar> allGuitars() {
-        return getGuitars.all();
-    }
+    private String type;
 
-    @GetMapping("/{id}")
-    public Guitar guitarById(@PathVariable("id") String id) {
-        return getGuitars.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
+    private int price;
+
+    private String image;
 }

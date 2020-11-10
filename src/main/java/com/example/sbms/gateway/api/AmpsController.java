@@ -23,8 +23,8 @@
  */
 package com.example.sbms.gateway.api;
 
-import com.example.sbms.gateway.model.Guitar;
-import com.example.sbms.gateway.service.GetGuitars;
+import com.example.sbms.gateway.model.Amp;
+import com.example.sbms.gateway.service.GetAmps;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,17 +32,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-@RestController
-@RequestMapping("/guitars/{id}")
-public class GuitarController {
-    private final GetGuitars getGuitars;
+import java.util.List;
 
-    public GuitarController(GetGuitars getGuitars) {
-        this.getGuitars = getGuitars;
+@RestController
+@RequestMapping("/amps")
+public class AmpsController {
+    private final GetAmps getAmps;
+
+    public AmpsController(GetAmps getAmps) {
+        this.getAmps = getAmps;
     }
 
     @GetMapping
-    public Guitar guitarById(@PathVariable("id") String id) {
-        return getGuitars.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public List<Amp> allAmps() {
+        return getAmps.all();
+    }
+
+    @GetMapping("/{id}")
+    public Amp ampById(@PathVariable("id") String id) {
+        return getAmps.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }
