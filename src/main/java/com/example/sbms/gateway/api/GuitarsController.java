@@ -23,8 +23,8 @@
  */
 package com.example.sbms.gateway.api;
 
-import com.example.sbms.gateway.model.Guitar;
-import com.example.sbms.gateway.service.GetGuitars;
+import com.example.sbms.gateway.domain.model.Guitar;
+import com.example.sbms.gateway.domain.service.GetGuitars;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

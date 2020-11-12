@@ -21,25 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.model;
+package com.example.sbms.gateway.integration.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Amps {
-    private List<Amp> all;
+public class Filter {
+    private Map<String, Object> args;
 
-    public Optional<Amp> getOne() {
-        if (this.all.size() > 1) {
-            throw new IllegalStateException(String.format("Amps.getOne() called when container holds %d amps.", this.all.size()));
-        }
-        return this.all.isEmpty() ? Optional.empty() : Optional.of(this.all.get(0));
+    public static Filter forAll() {
+        return new Filter();
+    }
+
+    public static Filter forId(String id) {
+        Map<String, Object> args = new HashMap<>();
+        args.put("id", id);
+        return new Filter(args);
     }
 }

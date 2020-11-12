@@ -21,32 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.service;
+package com.example.sbms.gateway.integration;
 
-import com.example.sbms.gateway.model.Filter;
-import com.example.sbms.gateway.model.Guitar;
-import com.example.sbms.gateway.model.Guitars;
+import com.example.sbms.gateway.integration.model.Filter;
+import com.example.sbms.gateway.domain.model.Guitar;
+import com.example.sbms.gateway.domain.model.Guitars;
+import com.example.sbms.gateway.domain.service.data.GuitarRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-@Service
 @EnableKafka
-public class GetGuitars {
+@Component
+public class EventDrivenGuitarRepository implements GuitarRepository {
     private final ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate;
     private final String eventGuitarsRequestedTopic;
     private final long eventGuitarsRequestedTimeout;
 
-    public GetGuitars(ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate, @Value("${spring.kafka.producer.properties.event.guitars-requested.topic}") String eventGuitarsRequestedTopic, @Value("${spring.kafka.producer.properties.event.guitars-requested.timeout}") long eventGuitarsRequestedTimeout) {
+    public EventDrivenGuitarRepository(ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate, @Value("${spring.kafka.producer.properties.event.guitars-requested.topic}") String eventGuitarsRequestedTopic, @Value("${spring.kafka.producer.properties.event.guitars-requested.timeout}") long eventGuitarsRequestedTimeout) {
         this.kafkaTemplate = kafkaTemplate;
         this.eventGuitarsRequestedTopic = eventGuitarsRequestedTopic;
         this.eventGuitarsRequestedTimeout = eventGuitarsRequestedTimeout;
@@ -69,7 +71,7 @@ public class GetGuitars {
             return response.value();
         }
         catch (InterruptedException | TimeoutException | ExecutionException e) {
-            throw new ServiceException(e);
+            throw new IntegrationException(e);
         }
     }
 }

@@ -21,35 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.api;
+package com.example.sbms.gateway.domain.service;
 
 import com.example.sbms.gateway.domain.model.Amp;
-import com.example.sbms.gateway.domain.service.GetAmps;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import com.example.sbms.gateway.domain.service.data.AmpRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/amps")
-public class AmpsController {
-    private final GetAmps getAmps;
+@Service
+public class GetAmps {
+    private final AmpRepository ampRepository;
 
-    public AmpsController(GetAmps getAmps) {
-        this.getAmps = getAmps;
+    public GetAmps(AmpRepository ampRepository) {
+        this.ampRepository = ampRepository;
     }
 
-    @GetMapping
-    public List<Amp> allAmps() {
-        return getAmps.all();
+    public List<Amp> all() {
+        return ampRepository.all();
     }
 
-    @GetMapping("/{id}")
-    public Amp ampById(@PathVariable("id") String id) {
-        return getAmps.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public Optional<Amp> byId(String id) {
+        return ampRepository.byId(id);
     }
 }

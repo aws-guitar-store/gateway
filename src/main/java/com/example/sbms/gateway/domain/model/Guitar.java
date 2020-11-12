@@ -21,19 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.model;
+package com.example.sbms.gateway.domain.model;
 
 import lombok.Data;
 
 @Data
-public class Amp {
-    private Integer id;
+public class Guitar {
+    private String id;
 
     private String make;
 
     private String model;
 
+    private String finish;
+
     private String type;
+
+    private String body;
 
     private int price;
 

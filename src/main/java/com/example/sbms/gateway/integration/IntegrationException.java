@@ -21,35 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.api;
+package com.example.sbms.gateway.integration;
 
-import com.example.sbms.gateway.domain.model.Amp;
-import com.example.sbms.gateway.domain.service.GetAmps;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/amps")
-public class AmpsController {
-    private final GetAmps getAmps;
-
-    public AmpsController(GetAmps getAmps) {
-        this.getAmps = getAmps;
+public class IntegrationException extends RuntimeException {
+    public IntegrationException() {
+        super();
     }
 
-    @GetMapping
-    public List<Amp> allAmps() {
-        return getAmps.all();
+    public IntegrationException(String message) {
+        super(message);
     }
 
-    @GetMapping("/{id}")
-    public Amp ampById(@PathVariable("id") String id) {
-        return getAmps.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public IntegrationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public IntegrationException(Throwable cause) {
+        super(cause);
+    }
+
+    public IntegrationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -21,26 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.service;
+package com.example.sbms.gateway.domain.service.data;
 
-public class ServiceException extends RuntimeException {
-    public ServiceException() {
-        super();
-    }
+import com.example.sbms.gateway.domain.model.Amp;
 
-    public ServiceException(String message) {
-        super(message);
-    }
+import java.util.List;
+import java.util.Optional;
 
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface AmpRepository {
+    List<Amp> all();
 
-    public ServiceException(Throwable cause) {
-        super(cause);
-    }
-
-    public ServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+    Optional<Amp> byId(String id);
 }

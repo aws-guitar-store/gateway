@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.service;
+package com.example.sbms.gateway.integration.config;
 
-import com.example.sbms.gateway.model.Amps;
-import com.example.sbms.gateway.model.Filter;
-import com.example.sbms.gateway.model.Guitars;
+import com.example.sbms.gateway.domain.model.Amps;
+import com.example.sbms.gateway.integration.model.Filter;
+import com.example.sbms.gateway.domain.model.Guitars;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.service;
+package com.example.sbms.gateway.integration.config;
 
-import com.example.sbms.gateway.model.Amps;
-import com.example.sbms.gateway.model.Guitars;
+import com.example.sbms.gateway.domain.model.Amps;
+import com.example.sbms.gateway.domain.model.Guitars;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;

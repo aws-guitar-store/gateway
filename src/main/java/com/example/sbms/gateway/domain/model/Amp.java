@@ -21,28 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.model;
+package com.example.sbms.gateway.domain.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Filter {
-    private Map<String, Object> args;
+public class Amp {
+    private Integer id;
 
-    public static Filter forAll() {
-        return new Filter();
-    }
+    private String make;
 
-    public static Filter forId(String id) {
-        Map<String, Object> args = new HashMap<>();
-        args.put("id", id);
-        return new Filter(args);
-    }
+    private String model;
+
+    private String type;
+
+    private int price;
+
+    private String image;
 }

@@ -21,35 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.api;
+package com.example.sbms.gateway.domain.service.data;
 
-import com.example.sbms.gateway.domain.model.Amp;
-import com.example.sbms.gateway.domain.service.GetAmps;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import com.example.sbms.gateway.domain.model.Guitar;
 
 import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/amps")
-public class AmpsController {
-    private final GetAmps getAmps;
+public interface GuitarRepository {
+    List<Guitar> all();
 
-    public AmpsController(GetAmps getAmps) {
-        this.getAmps = getAmps;
-    }
-
-    @GetMapping
-    public List<Amp> allAmps() {
-        return getAmps.all();
-    }
-
-    @GetMapping("/{id}")
-    public Amp ampById(@PathVariable("id") String id) {
-        return getAmps.byId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
+    Optional<Guitar> byId(String id);
 }

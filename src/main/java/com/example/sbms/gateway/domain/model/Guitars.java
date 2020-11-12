@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.model;
+package com.example.sbms.gateway.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
