@@ -23,33 +23,29 @@
  */
 package com.example.sbms.gateway.integration;
 
+import com.example.sbms.gateway.integration.config.GatewayChannels;
+import com.example.sbms.gateway.integration.config.StreamGateway;
 import com.example.sbms.gateway.integration.model.Filter;
 import com.example.sbms.gateway.domain.model.Amp;
 import com.example.sbms.gateway.domain.model.Amps;
 import com.example.sbms.gateway.domain.service.data.AmpRepository;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-import org.springframework.kafka.requestreply.RequestReplyFuture;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-@EnableKafka
+@EnableBinding({ Processor.class, GatewayChannels.class, StreamGateway.class })
 @Component
 public class EventDrivenAmpRepository implements AmpRepository {
-    private final ReplyingKafkaTemplate<String, Filter, Amps> kafkaTemplate;
+    private final StreamGateway streamGateway;
     private final String eventAmpsRequestedTopic;
     private final long eventAmpsRequestedTimeout;
 
-    public EventDrivenAmpRepository(ReplyingKafkaTemplate<String, Filter, Amps> kafkaTemplate, @Value("${spring.kafka.producer.properties.event.amps-requested.topic}") String eventAmpsRequestedTopic, @Value("${spring.kafka.producer.properties.event.amps-requested.timeout}") long eventAmpsRequestedTimeout) {
-        this.kafkaTemplate = kafkaTemplate;
+    public EventDrivenAmpRepository(StreamGateway streamGateway, @Value("${spring.kafka.producer.properties.event.amps-requested.topic}") String eventAmpsRequestedTopic, @Value("${spring.kafka.producer.properties.event.amps-requested.timeout}") long eventAmpsRequestedTimeout) {
+        this.streamGateway = streamGateway;
         this.eventAmpsRequestedTopic = eventAmpsRequestedTopic;
         this.eventAmpsRequestedTimeout = eventAmpsRequestedTimeout;
     }
@@ -63,15 +59,6 @@ public class EventDrivenAmpRepository implements AmpRepository {
     }
 
     private Amps sendRequest(Filter filter) {
-        ProducerRecord<String, Filter> producerRecord = new ProducerRecord<>(this.eventAmpsRequestedTopic, filter);
-        RequestReplyFuture<String, Filter, Amps> reply = kafkaTemplate.sendAndReceive(producerRecord);
-        try {
-            reply.getSendFuture().get(eventAmpsRequestedTimeout, TimeUnit.MILLISECONDS);
-            ConsumerRecord<String, Amps> response = reply.get(this.eventAmpsRequestedTimeout, TimeUnit.MILLISECONDS);
-            return response.value();
-        }
-        catch (InterruptedException | TimeoutException | ExecutionException e) {
-            throw new IntegrationException(e);
-        }
+        return streamGateway.process(filter);
     }
 }

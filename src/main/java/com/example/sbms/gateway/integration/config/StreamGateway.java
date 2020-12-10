@@ -21,28 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.example.sbms.gateway.integration.model;
+package com.example.sbms.gateway.integration.config;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.integration.annotation.Gateway;
+import org.springframework.integration.annotation.MessagingGateway;
 
-import java.util.HashMap;
-import java.util.Map;
+@MessagingGateway
+public interface StreamGateway {
+    String ENRICH = "enrich";
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Filter {
-    private Map<String, Object> args;
-
-    public static Filter forAll() {
-        return new Filter();
-    }
-
-    public static Filter forId(String id) {
-        Map<String, Object> args = new HashMap<>();
-        args.put("id", id);
-        return new Filter(args);
-    }
+    @Gateway(requestChannel = ENRICH, replyChannel = GatewayChannels.REPLY)
+    <T, R> R process(T payload);
 }

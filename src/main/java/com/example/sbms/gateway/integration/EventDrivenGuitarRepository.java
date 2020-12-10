@@ -23,33 +23,29 @@
  */
 package com.example.sbms.gateway.integration;
 
+import com.example.sbms.gateway.integration.config.GatewayChannels;
+import com.example.sbms.gateway.integration.config.StreamGateway;
 import com.example.sbms.gateway.integration.model.Filter;
 import com.example.sbms.gateway.domain.model.Guitar;
 import com.example.sbms.gateway.domain.model.Guitars;
 import com.example.sbms.gateway.domain.service.data.GuitarRepository;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-import org.springframework.kafka.requestreply.RequestReplyFuture;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-@EnableKafka
+@EnableBinding({ Processor.class, GatewayChannels.class, StreamGateway.class })
 @Component
 public class EventDrivenGuitarRepository implements GuitarRepository {
-    private final ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate;
+    private final StreamGateway streamGateway;
     private final String eventGuitarsRequestedTopic;
     private final long eventGuitarsRequestedTimeout;
 
-    public EventDrivenGuitarRepository(ReplyingKafkaTemplate<String, Filter, Guitars> kafkaTemplate, @Value("${spring.kafka.producer.properties.event.guitars-requested.topic}") String eventGuitarsRequestedTopic, @Value("${spring.kafka.producer.properties.event.guitars-requested.timeout}") long eventGuitarsRequestedTimeout) {
-        this.kafkaTemplate = kafkaTemplate;
+    public EventDrivenGuitarRepository(StreamGateway streamGateway, @Value("${spring.kafka.producer.properties.event.guitars-requested.topic}") String eventGuitarsRequestedTopic, @Value("${spring.kafka.producer.properties.event.guitars-requested.timeout}") long eventGuitarsRequestedTimeout) {
+        this.streamGateway = streamGateway;
         this.eventGuitarsRequestedTopic = eventGuitarsRequestedTopic;
         this.eventGuitarsRequestedTimeout = eventGuitarsRequestedTimeout;
     }
@@ -63,15 +59,6 @@ public class EventDrivenGuitarRepository implements GuitarRepository {
     }
 
     private Guitars sendRequest(Filter filter) {
-        ProducerRecord<String, Filter> producerRecord = new ProducerRecord<>(this.eventGuitarsRequestedTopic, filter);
-        RequestReplyFuture<String, Filter, Guitars> reply = kafkaTemplate.sendAndReceive(producerRecord);
-        try {
-            reply.getSendFuture().get(eventGuitarsRequestedTimeout, TimeUnit.MILLISECONDS);
-            ConsumerRecord<String, Guitars> response = reply.get(this.eventGuitarsRequestedTimeout, TimeUnit.MILLISECONDS);
-            return response.value();
-        }
-        catch (InterruptedException | TimeoutException | ExecutionException e) {
-            throw new IntegrationException(e);
-        }
+        return streamGateway.process(filter);
     }
 }
